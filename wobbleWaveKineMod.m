@@ -1,5 +1,6 @@
 function struct = wobbleWaveKineMod(structfile)
 load(structfile);
+clear 'structfile'
 vars = who;
 eval(['struct=',cell2mat(vars(1))])
 % struct.fishLength = 85; <-- for debugging

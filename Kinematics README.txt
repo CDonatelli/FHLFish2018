@@ -29,5 +29,6 @@ figure out what functions work better.
  - EX 'gp0321.avi'
 
 2) Find Midlines
+ - Your workspace should be clear for this to work
  - Again, make sure you are in the working directory containing
    your video files

@@ -1,5 +1,6 @@
 function sOut = MidlineWob2(structfile)
 load(structfile);
+clear 'structfile'
 vars = who;
 eval(['sOut=',cell2mat(vars(1))])
 %sOut = struct;
