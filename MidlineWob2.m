@@ -1,7 +1,7 @@
 function sOut = MidlineWob2(structfile)
 load(structfile);
 vars = who;
-eval(['sOut=',cell2mat(vars(2))])
+eval(['sOut=',cell2mat(vars(1))])
 %sOut = struct;
     %disp('Please select the directory holding your video.');
     %direct = uigetdir;
@@ -149,8 +149,8 @@ for Index = 1:size(Lines,2)
     %fprintf(output, '%f %f\n',
 end
 sOut.midLines = Lines;
-eval([cell2mat(vars(2)), '= sOut'])
-save(cell2mat(vars(2)), cell2mat(vars(2)));
+eval([cell2mat(vars(1)), '= sOut'])
+save(cell2mat(vars(1)), cell2mat(vars(1)));
 
 %this finds a radius of a circle centered on a point that overlaps both
 %sides of the fish. written by Cassandra Donatelli 2014

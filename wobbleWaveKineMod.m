@@ -1,7 +1,7 @@
 function struct = wobbleWaveKineMod(structfile)
 load(structfile);
 vars = who;
-eval(['struct=',cell2mat(vars(2))])
+eval(['struct=',cell2mat(vars(1))])
 % struct.fishLength = 85; <-- for debugging
 % Initiating variables
     % reading variables from structure
@@ -123,8 +123,7 @@ eval(['struct=',cell2mat(vars(2))])
         p = [p1';abs(p2')]; k = [k1';abs(k2')];
         xValues = x(20,k);
         % check if peakfinder did it's damn job
-        [xValues,p] = correctPeakFinder(xValues,p,x(20,:),y(20,:),['Wave
-            peaks']);
+        [xValues,p] = correctPeakFinder(xValues,p,x(20,:),y(20,:),['Wave peaks']);
         wavePeaks = [xValues',p];
         wavelen = [];
         for i = 2:2:size(wavePeaks,1)
@@ -147,8 +146,8 @@ eval(['struct=',cell2mat(vars(2))])
     struct.bendingAmp = median(tailAmps);
     struct.bendingAmps = tailAmps;
     struct.bodyAmps = BodyAmps;
-    eval([cell2mat(vars(2)), '= struct'])
-    save(cell2mat(vars(2)), cell2mat(vars(2)));
+    eval([cell2mat(vars(1)), '= struct'])
+    save(cell2mat(vars(1)), cell2mat(vars(1)));
 end
 
 function [k,p] = correctPeakFinder(k,p,X,Y,Title)
