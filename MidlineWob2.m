@@ -267,7 +267,7 @@ BlurredImage = imfilter(Frame,h);
                                              % assumes motionscope frame
 %Level = graythresh(BlurredImage)*.8;         %set threshold a little darker than the auto computed one
 FrameOut = ~im2bw(BlurredImage,Level);       %make image binary and invert it so fish is white
-FrameOut = bwareaopen(FrameOut, 50);
+FrameOut = bwareaopen(FrameOut, 75);
 FrameOut(1:3,:) = [];
 FrameOut(end-2:end,:) = [];
 FrameOut(:,1:3) = [];
