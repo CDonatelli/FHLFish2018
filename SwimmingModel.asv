@@ -1,0 +1,40 @@
+
+AmpFactor = 0.083;
+Intercept = -0.004;
+t = 0:0.05:2;
+carrier = sin(pi*t+0).*(AmpFactor*t);
+
+h = figure;
+% plot(t,carrier,'LineWidth',2,'Color','b');
+axisLimits = [-1,3,-1,1];
+axis(axisLimits)
+pbaspect([(axisLimits(2)-axisLimits(1)) (axisLimits(4)-axisLimits(3)) 1])
+% gif('myfile.gif')
+for i = 0:0.75:2*pi
+    carrier = sin(pi*t+i).*(AmpFactor*t);
+    plot(t,carrier,'LineWidth',1,'Color','k');
+    axis(axisLimits)
+    pbaspect([(axisLimits(2)-axisLimits(1)) (axisLimits(4)-axisLimits(3)) 1])
+    hold on
+end
+ print(h, '-djpeg', 'background');
+ img = imread('background.jpg');
+
+h = figure;
+plot(t,carrier,'LineWidth',2,'Color','b');
+axisLimits = [-1,3,-1,1];
+axis(axisLimits)
+pbaspect([(axisLimits(2)-axisLimits(1)) (axisLimits(4)-axisLimits(3)) 1])
+% gif('myfile.gif')
+ 
+hold off
+for i = 0:0.5:30
+    displayIm=img;
+    carrier = sin(pi*t+i).*(AmpFactor*t);
+    set(
+%     plot(t,carrier,'LineWidth',2,'Color','b');
+%     axis(axisLimits)
+%     pbaspect([(axisLimits(2)-axisLimits(1)) (axisLimits(4)-axisLimits(3)) 1])
+    pause(0.1)
+%   gif
+end
