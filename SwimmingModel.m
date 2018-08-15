@@ -1,7 +1,6 @@
-function SwimmingModel(nameString)
+function SwimmingModel(nameString, AmpFactor)
 
     % Add the amp factor from R here
-    AmpFactor = 0.0830;
     Intercept = -0.004;
     t = 0:0.05:2;
     axisLimits = [-1,3,-1,1];
