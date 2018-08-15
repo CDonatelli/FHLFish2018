@@ -1,7 +1,7 @@
 function SwimmingModel(nameString)
 
     % Add the amp factor from R here
-    AmpFactor = 0.083;
+    AmpFactor = 0.0830;
     Intercept = -0.004;
     t = 0:0.05:2;
     axisLimits = [-1,3,-1,1];
@@ -29,8 +29,8 @@ function SwimmingModel(nameString)
     pbaspect([(axisLimits(2)-axisLimits(1)) (axisLimits(4)-axisLimits(3)) 1])
     gif([nameString,'.gif'])
     hold off
-    for i = 0.5:0.5:30
-        carrier = sin(pi*t+i).*(AmpFactor*t);
+    for i = 0.5:0.5:60
+        carrier = sin(pi*t-i).*(AmpFactor*t);
         plot(t,carrier,'LineWidth',2,'Color','b');
         axis(axisLimits)
         pbaspect([(axisLimits(2)-axisLimits(1)) (axisLimits(4)-axisLimits(3)) 1])
