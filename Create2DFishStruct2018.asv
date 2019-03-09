@@ -29,8 +29,8 @@ save(nameString, 'name');
     for i = 1:videos
         Struct = name;
         Struct.vid = input(['Name of video for struct ',num2str(i),': ']);
-        eval([nameString+'_'+num2str(i)+'= Struct'])
-        save([nameString+'_'+num2str(i)], [nameString+'_'+num2str(i)]);
+        eval([[nameString,'_',num2str(i)], '= Struct'])
+        save([nameString,'_',num2str(i)], [nameString,'_',num2str(i)]);
     end
 
 end

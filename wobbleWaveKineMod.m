@@ -8,13 +8,13 @@ eval(['struct=',cell2mat(vars(1))])
     % reading variables from structure
     length = struct.fishLength;
     mids = struct.midLines;
-    
+    frames = size(mids,2);
     % Calculate the scale of the video using the fish length
     % as the scale bar
         FishPixelLengths = [];
         % Loop through a few frames of the vide and calculate the
         % length of the midline at each frame
-        for i = 1:4:50
+        for i = 1:round(frames/15):frames
             FishPixelLengths = [FishPixelLengths,...
                 arclength(mids(i).MidLine(:,1),mids(i).MidLine(:,2))];
         end
