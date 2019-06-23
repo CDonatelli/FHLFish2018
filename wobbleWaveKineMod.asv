@@ -14,13 +14,13 @@ function struct = wobbleWaveKineMod(structfile)
     length = inputdlg(prompt,dlgtitle,dims,definput);
     
     mids = struct.midLines;
-    nfr = size(mids,2);
+    frames = size(mids,2);
     % Calculate the scale of the video using the fish length
     % as the scale bar
         FishPixelLengths = [];
         % Loop through a few frames of the vide and calculate the
         % length of the midline at each frame
-        for i = 1:round(nfr/15):nfr
+        for i = 1:round(frames/15):frames
             FishPixelLengths = [FishPixelLengths,...
                 arclength(mids(i).MidLine(:,1),mids(i).MidLine(:,2))];
         end
@@ -43,8 +43,11 @@ function struct = wobbleWaveKineMod(structfile)
     tail = struct.tailPts ./length; %for interparc
     % points to generate data for
     npts = 21;
+    % frame number
+    nfr = size(mids,2);
     % initiating new variables
-    x = []; y = []; tailPtCordsY = []; tailPtCordsX = [];
+    x = []; y = [];
+    tailPtCordsY = []; tailPtCordsX = [];
     for i = 1:nfr
         % Generate equation if the midline
         [pts, deriv, funct] = interparc(npts,  mids(i).MidLine(:,1),  ... 

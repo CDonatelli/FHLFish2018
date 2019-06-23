@@ -130,19 +130,19 @@ for Index = 1:FrNum
         X = Centers(TrackOpt,1); Y = Centers(TrackOpt,2);
     
     %%%% THIS IS MEANT TO FIX IT IF THE MIDLINE BOUNCES
-    if any(diff(Centers(:,1)) <= 0)
-        screwed = false; over = [];
-        for i = 2:length(Centers)
-            if Centers(i-1,1) > Centers(i,1)
-                screwed = true;
-                over = i-1;
-                break
-            else
-                screwed = false;
-            end
-        end
-        Centers(over:end,:) = [];
-    end
+%     if any(diff(Centers(:,1)) <= 0)
+%         screwed = false; over = [];
+%         for i = 2:length(Centers)
+%             if Centers(i-1,1) > Centers(i,1)
+%                 screwed = true;
+%                 over = i-1;
+%                 break
+%             else
+%                 screwed = false;
+%             end
+%         end
+%         Centers(over:end,:) = [];
+%     end
     %%%%%%%%%%%%%%%%%%%%%%
     
     

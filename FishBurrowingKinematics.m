@@ -1,8 +1,8 @@
-function struct = wobbleWaveKineMod(structfile)
+function struct = FishBurrowingKinematics(structfile)
     load(structfile);
     clear 'structfile'
     vars = who;
-    eval(['struct=',cell2mat(vars(1))])
+    eval(['struct=',cell2mat(vars(1))]);
     % struct.fishLength = 85; <-- for debugging
     % Initiating variables
         % reading variables from structure
@@ -12,6 +12,7 @@ function struct = wobbleWaveKineMod(structfile)
     dims = [1 35];
     definput = {'0'};
     length = inputdlg(prompt,dlgtitle,dims,definput);
+    length = cell2mat(length);
     
     mids = struct.midLines;
     nfr = size(mids,2);
@@ -39,8 +40,7 @@ function struct = wobbleWaveKineMod(structfile)
         struct.VidScale = VidScale;
 
     perc = 0.2:0.1:0.9;
-    struct.tailPts = length.*perc;
-    tail = struct.tailPts ./length; %for interparc
+    struct.tailPts = fishPixels.*perc;
     % points to generate data for
     npts = 21;
     % initiating new variables
@@ -54,8 +54,8 @@ function struct = wobbleWaveKineMod(structfile)
         
         % usee the above function to find the coordinates of the points
         % of interest in the tail region (to be used later
-        for j = 1:size(tail,2)
-            cordinate = funct(tail(j));
+        for j = 1:size(struct.tailPts,2)
+            cordinate = funct(struct.tailPts(j));
             tailPtCordsX(j,i) = cordinate(1);
             tailPtCordsY(j,i) = cordinate(2);
         end
