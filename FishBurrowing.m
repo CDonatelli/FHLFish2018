@@ -282,7 +282,7 @@ FrameOut(:,1:3) = [];
 FrameOut(:,end-2:end) = [];
 
 %Smooth broken bits of fish
-    se = strel('disk',25);
+    se = strel('disk',35);
     FrameOut = imclose(FrameOut,se);
 
 
