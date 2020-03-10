@@ -3,6 +3,7 @@ function struct = FishBurrowingKinematics(structfile)
     clear 'structfile'
     vars = who;
     eval(['struct=',cell2mat(vars(1))]);
+    %This imports the data
 
     prompt = {'Enter fish length in mm (leave as 0 if unknown)'};
     dlgtitle = 'Fish Length';
