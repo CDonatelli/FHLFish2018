@@ -20,13 +20,18 @@ Y=[];
     
     % Get the rough levels of the background and of the fish  
     % (assuming background is plain and uniform for now)
+    % If you have a BW video instead of RGB swich the "GetLevels" version
     [BackLev, FishLev] = GetLevels(imcrop(ImStart,rect));
+    % or
+    %[BackLev, FishLev] = GetLevelsBW(imcrop(ImStart,rect));
+    
     sOut.backLevel = BackLev; sOut.fishLevel = FishLev;
     
     %This bit assumes the fish is dark and the background is light
     ThreshLevel = median([BackLev(2),FishLev(1)])/255;
+
     % Use this if the fish is light and the back is dark
-    % median(BackLev(1),FishLev(2))
+    %median(BackLev(1),FishLev(2))
     
     % Test if the threshhold is good and edit if it isnt
         choice = 1;
@@ -275,14 +280,14 @@ BlurredImage = imfilter(Frame,h);
                                              % assumes motionscope frame
 %Level = graythresh(BlurredImage)*.8;         %set threshold a little darker than the auto computed one
 FrameOut = ~im2bw(BlurredImage,Level);       %make image binary and invert it so fish is white
-FrameOut = bwareaopen(FrameOut, 75);
+FrameOut = bwareaopen(FrameOut, 50);
 FrameOut(1:3,:) = [];
 FrameOut(end-2:end,:) = [];
 FrameOut(:,1:3) = [];
 FrameOut(:,end-2:end) = [];
 
 %Smooth broken bits of fish
-    se = strel('disk',35);
+    se = strel('disk',10);
     FrameOut = imclose(FrameOut,se);
 
 
@@ -435,3 +440,75 @@ function [Back, Obj] = GetLevels(im)
     hold off
     Back = [MaxBac, MinBac]; Obj = [MaxObj, MinObj];
     
+function [Back, Obj] = GetLevelsBW(im)   
+    % Read in original RGB image.
+    rgbImage = im;
+        
+    OBlu = []; BBlu = [];
+    imshow(im); hold on
+    disp('Get Fish Levels');
+    [Xo Yo] = getpts;
+    plot(Xo,Yo,'bo');
+    hold on
+    for i = 1:length(Xo)
+        O = impixel(im,Xo(i),Yo(i));
+        OBlu = [OBlu,O(1)];
+    end
+    disp('Get background Levels');
+    [Xb Yb] = getpts;
+    plot(Xb,Yb,'ro');
+    hold on
+    for i = 1:length(Xb)
+        B = impixel(im,Xb(i),Yb(i));
+        BBlu = [BBlu,B(1)];
+    end
+    
+    MaxObj = max(OBlu); MinObj = min(OBlu);
+    MaxBac = max(BBlu); MinBac = min(BBlu);
+    
+    % If the levels are overlapping, find the average
+    % For now assuming that the background and fish are pretty different
+    % so the only overlapping levels considered are as follows:
+    % MaxFish > MaxBackground > MinFish > MinBackground
+    % MaxBackground > MaxFish > MinBackground > MinFish
+    % Looking to create an order that looks like one of the following:
+    % MaxFish > MinFish > MaxBackground > MinBackground
+    % MaxBackground > MinBackground > MaxFish > MinFish
+    
+    if MaxObj >= MinBac 
+        if MaxBac >= MinObj 
+            Avg = round(mean([MaxBac MinObj]));
+            MinObj = Avg;
+            MaxBac = Avg-1;
+        end
+    end
+    if MaxBac >= MinObj 
+        if MaxObj >= MinBac   
+            Avg = round(mean([MaxObj MinBac]));
+            MaxObj = Avg;
+            MinBac = Avg+1;
+        end
+    end
+    
+    %Now I need to account for the fact that the user might not select the
+    %full range of points on the fish (I did this and it leads to incorrect
+    %D values which means incorrect wobble measurements. This is a cheat-y
+    %fix but it works with my videos. This part of the code is less
+    %adaptable for other users (especially if they are filming in a
+    %background that is not super different from the fish). 
+    %Assumes one of these two cases:
+    % MinBackground < MaxBackground < MinFish < MaxFish 
+    % MinFish < MaxFish < MinBackground < MaxBackground
+    
+    if MinObj > MaxBac
+        MinObj = MinObj - ((MinObj-MaxBac)/2);
+        MaxObj = MaxObj + ((MinObj-MaxBac)/2);
+    end
+    if MinBac > MaxObj
+        MaxObj = MaxObj + ((MinBac-MaxObj)/2);
+        MinObj = MinObj - ((MinBac-MaxObj)/2);
+    end
+    
+    hold off
+    Back = [MaxBac, MinBac]; Obj = [MaxObj, MinObj];
+        
