@@ -57,6 +57,16 @@ Y=[];
                 ThreshLevel = ThreshLevel;
             end
         end
+        
+%     answer = questdlg('Which tracking mode do you want to use?', ...
+%     'Tracking Modes', ...
+%     'FastTrack','SensiTrack','SensiTrack');
+%     switch answer
+%         case 'FastTrack'
+%             TrackOpt = 2;
+%         case 'SensiTrack'
+            TrackOpt = 1;
+%     end
 
 for Index = 1:FrNum
     RawImage = read(FileNamePrefix,Index);%get the first image to allow user to click the fish    
@@ -64,7 +74,6 @@ for Index = 1:FrNum
     if (size(X,1) == 0 || BinaryImage(round(Y),round(X)) == 0)
         BinaryImage = ProcessImage(RawImage,ThreshLevel);
         imshow(BinaryImage);
-        figure('Name','Click the nose of the Fish','NumberTitle','off')
         [X Y] = ginput(1);  %get the location of the fish
     end
     BinaryImage = ProcessImage(RawImage,ThreshLevel,[X,Y]);
@@ -314,30 +323,16 @@ function Arc = TrimArc(Image, Arc)
 function Nose = FindNose(Frame, X, Y, Angle)
     [XTemp,YTemp] = pol2cart(Angle,1);
     [m,n] = size(Frame);
-        if X == 0
-            X = X+1;
-        elseif X > m
-            X = m;
-        end
-        if Y == 0
-            Y = Y+1;
-        elseif Y > n
-            Y = n;
-        end
+    if X == 0
+        X = X+1;
+    end
+    if Y == 0
+        Y = Y+1;
+    end
     while ~Frame(round(Y),round(X))==0
         X = X+(1.01*XTemp);
         Y = Y+(1.01*YTemp);
     end
-        if X == 0
-            X = X+1;
-        elseif X > m
-            X = m;
-        end
-        if Y == 0
-            Y = Y+1;
-        elseif Y > n
-            Y = n;
-        end
     Nose = [X,Y];    
     
 function rect = CropVideo(im)

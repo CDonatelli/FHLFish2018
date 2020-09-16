@@ -1,4 +1,4 @@
-function sOut = FishBurrowing(videoName)
+function sOut = FishBurrowingManual(videoName)
 
 sOut = struct;
 %vars = who;
@@ -22,12 +22,10 @@ Y=[];
     % Get the rough levels of the background and of the fish  
     % (assuming background is plain and uniform for now)
     if strcmp(convertCharsToStrings(format), 'Grayscale')
-        [BackLev, FishLev] = GetLevelsBW(imcrop(ImStart, rect));
+        [BackLev, FishLev] = GetLevelsBW(ImStart);
     else
-        [BackLev, FishLev] = GetLevels(imcrop(ImStart, rect));
+        [BackLev, FishLev] = GetLevels(ImStart);
     end
-    % or
-    %[BackLev, FishLev] = GetLevelsBW(imcrop(ImStart,rect));
     
     sOut.backLevel = BackLev; sOut.fishLevel = FishLev;
     
@@ -61,21 +59,17 @@ Y=[];
 for Index = 1:FrNum
     RawImage = read(FileNamePrefix,Index);%get the first image to allow user to click the fish    
     RawImage = imcrop(RawImage, rect);
-    if (size(X,1) == 0 || BinaryImage(round(Y),round(X)) == 0)
-        BinaryImage = ProcessImage(RawImage,ThreshLevel);
-        imshow(BinaryImage);
-        figure('Name','Click the nose of the Fish','NumberTitle','off')
-        [X Y] = ginput(1);  %get the location of the fish
-    end
-    BinaryImage = ProcessImage(RawImage,ThreshLevel,[X,Y]);
+    BinaryImage = ProcessImage(RawImage,ThreshLevel);       %blur the image, threshold and invert
     LabelImage = bwlabeln(BinaryImage,4);       %label the image to use image props          
     imshow(BinaryImage);
     ImageStats = regionprops(LabelImage,'all'); %get stats on the labelled image
 
     %if this is the first frame then get teh nose, otherwise use teh front
     %point from the last image as teh temporary nose.
-
- 
+%     if (size(X,1) == 0 || BinaryImage(round(Y),round(X)) == 0)
+    figure('Name','Click the nose of the fish','NumberTitle','off')
+    [X Y] = ginput(1);  %get the location of the fish
+%     end
     
     FishRegion = LabelImage(round(Y),round(X)); %get the region number of the fish
     FishImage = BinaryImage;%.*(LabelImage==FishRegion);  %kill all the rest of the binary image
@@ -167,7 +161,6 @@ save(videoName(1:end-4), videoName(1:end-4));
 
 %this finds a radius of a circle centered on a point that overlaps both
 %sides of the fish. written by Cassandra Donatelli 2014
-
 function R = RadFind(Image,X,Y)
         R = 5;
         changes = 0;
@@ -198,7 +191,6 @@ function R = RadFind(Image,X,Y)
 %returns the list of points in an arc centered at X,Y of Radius R. A 2014
 %revision to this code removes the duplications that arise from the
 %floor step.
-
 function Arc = GetArc(X,Y,R,PhiStart,PhiFinish)
 Arc=[];
 for Theta = PhiStart:2*pi/720:PhiFinish    %make a reading each degree                                            
