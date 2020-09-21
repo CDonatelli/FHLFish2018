@@ -56,6 +56,8 @@ Y=[];
             end
         end
 
+figure('Name','Click the nose of the fish','NumberTitle','off')
+        
 for Index = 1:FrNum
     RawImage = read(FileNamePrefix,Index);%get the first image to allow user to click the fish    
     RawImage = imcrop(RawImage, rect);
@@ -67,7 +69,6 @@ for Index = 1:FrNum
     %if this is the first frame then get teh nose, otherwise use teh front
     %point from the last image as teh temporary nose.
 %     if (size(X,1) == 0 || BinaryImage(round(Y),round(X)) == 0)
-    figure('Name','Click the nose of the fish','NumberTitle','off')
     [X Y] = ginput(1);  %get the location of the fish
 %     end
     
