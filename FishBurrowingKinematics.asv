@@ -9,8 +9,8 @@ function struct = FishBurrowingKinematics(structfile)
     dlgtitle = 'Fish Length';
     dims = [1 35];
     definput = {'0'};
-    lengthMM = inputdlg(prompt,dlgtitle,dims,definput);
-    lengthMM = str2double(lengthMM);
+    length = inputdlg(prompt,dlgtitle,dims,definput);
+    length = str2double(length);
     
     mids = struct.midLines;
     nfr = size(mids,2);
@@ -27,8 +27,8 @@ function struct = FishBurrowingKinematics(structfile)
         % midline measurements to calculate the scale of the video
         fishPixels = median(FishPixelLengths);
         
-        struct.fishLength = lengthMM;
-        VidScale = lengthMM/fishPixels;
+        struct.fishLength = length;
+        VidScale = length/fishPixels;
         struct.VidScale = VidScale;
         
     % points to generate data for
@@ -37,7 +37,7 @@ function struct = FishBurrowingKinematics(structfile)
     x = []; y = []; tailPtCordsY = []; tailPtCordsX = [];
     for i = 1:nfr
         xPts = mids(i).MidLine(:,1); yPts = mids(i).MidLine(:,2);
-        randPts = rand(1,length(xPts))/1000; xPts = xPts+randPts';
+        randPts = rand(1,length(xP
         % Generate equation if the midline
         [pts, deriv, funct] = interparc(npts, xPts, yPts, 'spline');
         % add those points to an array
@@ -56,7 +56,7 @@ function struct = FishBurrowingKinematics(structfile)
     
     total = nfr/fr; 
     struct.t = linspace(0,total,nfr)';
-    s = linspace(1,lengthMM,npts);
+    s = linspace(1,length,npts);
     struct.s = s';
     
     Amplitudes = []; Waves = []; Angles = [];
@@ -78,19 +78,19 @@ function struct = FishBurrowingKinematics(structfile)
         [AngPks,AngLoc] = findpeaks(abs(tAngles),struct.t,'MinPeakProminence',0.05);
         Angles = [Angles; median(AngPks)];
         
-%                 subplot(1,2,1);
-%                 plot(struct.t, abs(pointY))
-%                 hold on
-%                 plot(AmpLoc, AmpPks, 'ro')
-%                 subplot(1,2,2);
-%                 plot(struct.t, abs(tAngles))
-%                 hold on
-%                 plot(AngLoc, AngPks, 'ro')
-%                 pause
-%                 close all
+                subplot(1,2,1);
+                plot(struct.t, abs(pointY))
+                hold on
+                plot(AmpLoc, AmpPks, 'ro')
+                subplot(1,2,2);
+                plot(struct.t, abs(tAngles))
+                hold on
+                plot(AngLoc, AngPks, 'ro')
+                pause
+                close all
         
     end
-    nose = [x(1,1),y(1,1);x(1,end),y(1,end)];
+    nose = [X(1,1),Y(1,1);X(1,end),Y(1,end)];
     distance = pdist(nose, 'euclidean');
     struct.distance = distance./fishPixels;                  
     struct.swimmingSpeed = (struct.distance/struct.t(end));

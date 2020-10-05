@@ -63,19 +63,14 @@ for Index = 1:FrNum
     RawImage = imcrop(RawImage, rect);
     if (size(X,1) == 0 || BinaryImage(round(Y),round(X)) == 0)
         BinaryImage = ProcessImage(RawImage,ThreshLevel);
-        imshow(BinaryImage);
         figure('Name','Click the nose of the Fish','NumberTitle','off')
+        imshow(BinaryImage);
         [X Y] = ginput(1);  %get the location of the fish
     end
     BinaryImage = ProcessImage(RawImage,ThreshLevel,[X,Y]);
     LabelImage = bwlabeln(BinaryImage,4);       %label the image to use image props          
     imshow(BinaryImage);
     ImageStats = regionprops(LabelImage,'all'); %get stats on the labelled image
-
-    %if this is the first frame then get teh nose, otherwise use teh front
-    %point from the last image as teh temporary nose.
-
- 
     
     FishRegion = LabelImage(round(Y),round(X)); %get the region number of the fish
     FishImage = BinaryImage;%.*(LabelImage==FishRegion);  %kill all the rest of the binary image
@@ -88,6 +83,16 @@ for Index = 1:FrNum
     %on the head.  Setting that general direction establishes a polarity
     %for the midline search to proceed down the animal rather than from the
     %head to the nose.
+    if FishRegion == 0
+        [BinaryImage, ThreshLevel] = reProcessImage(RawImage,ThreshLevel);
+        [X Y] = ginput(1);
+        LabelImage = bwlabeln(BinaryImage,4);       %label the image to use image props          
+        ImageStats = regionprops(LabelImage,'all'); %get stats on the labelled image
+        FishRegion = LabelImage(round(Y),round(X));
+        FishImage = BinaryImage;
+        hold on;
+        plot(X,Y,'or'); %show the dot the user clicked
+    end
     XTemp=ImageStats(FishRegion).Centroid(1)-X;
     YTemp=ImageStats(FishRegion).Centroid(2)-Y;
     [AngleToNext,D] = cart2pol(XTemp, YTemp);
@@ -133,23 +138,6 @@ for Index = 1:FrNum
     %back from the nose.
         X = Centers(3,1); Y = Centers(3,2);
     
-    %%%% THIS IS MEANT TO FIX IT IF THE MIDLINE BOUNCES
-%     if any(diff(Centers(:,1)) <= 0)
-%         screwed = false; over = [];
-%         for i = 2:length(Centers)
-%             if Centers(i-1,1) > Centers(i,1)
-%                 screwed = true;
-%                 over = i-1;
-%                 break
-%             else
-%                 screwed = false;
-%             end
-%         end
-%         Centers(over:end,:) = [];
-%     end
-    %%%%%%%%%%%%%%%%%%%%%%
-    
-    
     Lines(Index).Frame=Index;       %save data in the output structure
     Lines(Index).MidLine=Centers;
     hold off    %allow the image to be redrawn
@@ -167,7 +155,6 @@ save(videoName(1:end-4), videoName(1:end-4));
 
 %this finds a radius of a circle centered on a point that overlaps both
 %sides of the fish. written by Cassandra Donatelli 2014
-
 function R = RadFind(Image,X,Y)
         R = 5;
         changes = 0;
@@ -198,7 +185,6 @@ function R = RadFind(Image,X,Y)
 %returns the list of points in an arc centered at X,Y of Radius R. A 2014
 %revision to this code removes the duplications that arise from the
 %floor step.
-
 function Arc = GetArc(X,Y,R,PhiStart,PhiFinish)
 Arc=[];
 for Theta = PhiStart:2*pi/720:PhiFinish    %make a reading each degree                                            
@@ -277,18 +263,18 @@ function FrameOut = ProcessImage(Frame,Level, varargin)
 h = ones(5,5) / 25;
 BlurredImage = imfilter(Frame,h);
 [m,n] = size(BlurredImage);
-%CroppedImage = double(BlurredImage);%(65:405,80:660); %this removes the borders from the images
 
 % assumes motionscope frame
-%Level = graythresh(BlurredImage)*.8;         %set threshold a little darker than the auto computed one
-FrameOut = ~im2bw(BlurredImage,Level);       %make image binary and invert it so fish is white
-FrameOut = bwareaopen(FrameOut, round(0.001*(m*n)));
+FrameOut = ~im2bw(BlurredImage,Level);       %make image binary and invert it so fish is white5
+
 FrameOut(1:3,:) = [];
 FrameOut(end-2:end,:) = [];
 FrameOut(:,1:3) = [];
 FrameOut(:,end-2:end) = [];
 
 %Smooth broken bits of fish
+FrameOut = imclearborder(FrameOut);
+FrameOut = bwareaopen(FrameOut, round(0.001*(m*n)));
     se = strel('disk',10);
     FrameOut = imclose(FrameOut,se);
 
@@ -535,4 +521,22 @@ function [Back, Obj] = GetLevelsBW(im)
     
     hold off
     Back = [MaxBac, MinBac]; Obj = [MaxObj, MinObj];
-        
+
+function [BinaryImage,ThreshLevel] = reProcessImage(RawImage,ThreshLevel)
+    choice = 1;
+    BinaryImage = ProcessImage(RawImage,ThreshLevel);
+    imshow(BinaryImage)
+    while choice ~= 2
+        choice = input('Is this good? (1 = brighten fish, 0 = dim  fish, 2 = good): ');
+        if choice == 0
+            ThreshLevel = ThreshLevel - 0.025;
+            BinaryImage = ProcessImage(RawImage,ThreshLevel);
+            imshow(BinaryImage)
+        elseif choice == 1
+            ThreshLevel = ThreshLevel + 0.025;
+            BinaryImage = ProcessImage(RawImage,ThreshLevel);
+            imshow(BinaryImage)
+        else
+            ThreshLevel = ThreshLevel;
+        end
+    end
