@@ -60,36 +60,26 @@ function struct = FishBurrowingKinematics(structfile)
     
     Amplitudes = []; Waves = []; Angles = [];
     
-    pkVal = 0;
-    pkProm = 0.075;
+    pkVal = false;
     
-    while pkVal == 0
+    while pkVal == false
+    pkProm = 0.075;
         pointY = y(1,:); pointX = x(1,:);
         p = polyfit(pointX, pointY,3);  % fit line for the tail wave
         yT = polyval(p, pointX);        % y values for that line
         pointY = pointY - yT;           % subtract y values to get amplitude
         pointY = smooth(pointY,15,'rlowess'); pointX = smooth(pointX,15, 'rlowess');
         [AmpPks,AmpLoc] = findpeaks(abs(pointY),struct.t,'MinPeakProminence',pkProm);
-        plot(struct.t, abs(pointY)) 
+        plot(pointX, pointY) 
         hold on
-        plot(AmpLoc, AmpPks, 'bo')
-        hold off
         
-        answer = questdlg('Are you getting the correct peaks?', ...
-            ['Current value is' num2str(pkProm)], 'Yes','No','No');
-        % Handle response
-        switch answer
-            case 'Yes'
-                pkVal = 1;
-            case 'No'
-                pkVal = 0;
-                prompt = {'Enter a new prominence value.)'};
-                dlgtitle = ['Current value is' num2str(pkProm)];
-                dims = [1 35];  definput = {num2str(pkProm)};
-                pkProm = inputdlg(prompt,dlgtitle,dims,definput);
-                pkProm = str2double(pkProm);
-        end
-    end
+        %Find peakfinder paramaters
+        prompt = {['Current value is ', num2str(pkProm)]};
+        dlgtitle = 'Peak Prominence';
+        dims = [1 35];
+        definput = {'0'};
+        pkProm = inputdlg(prompt,dlgtitle,dims,definput);
+        pkProm = str2double(pkProm);
 
     for j = 1:npts
         pointY = y(j,:); pointX = x(j,:);
@@ -99,7 +89,7 @@ function struct = FishBurrowingKinematics(structfile)
         pointY = smooth(pointY,15,'rlowess'); pointX = smooth(pointX,15, 'rlowess');
         
         %%%%% Peak Finder
-        [AmpPks,AmpLoc] = findpeaks(abs(pointY),struct.t,'MinPeakProminence',pkProm);
+        [AmpPks,AmpLoc] = findpeaks(abs(pointY),struct.t,'MinPeakProminence',0.075);
         Amplitudes = [Amplitudes; median(AmpPks)/fishPixels];
         Waves = [Waves; length(AmpPks)/2];
         
@@ -123,13 +113,9 @@ function struct = FishBurrowingKinematics(structfile)
     nose = [x(1,1),y(1,1);x(1,end),y(1,end)];
     distance = pdist(nose, 'euclidean');
     struct.distance = distance./fishPixels;                  
-    struct.swimmingSpeed = (struct.distance/struct.t(end));        
-        t0 = find(struct.t == min(AmpLoc)); t1 = find(struct.t == max(AmpLoc));
-        noseAtPeaks = [x(1,t0),y(1,t0);x(1,t1),y(1,t1)];
-        peak2peakDist = pdist(noseAtPeaks, 'euclidean');
-        peak2peakDist = peak2peakDist./fishPixels;
-    struct.strideLength = peak2peakDist/Waves(end);
-    struct.bendingFrequency = Waves./struct.t(end);
+    struct.swimmingSpeed = (struct.distance/struct.t(end));
+    struct.strideLength = distance/Waves(end);
+    struct.bendingFrequency = Waves/struct.t(end);
     struct.Amplitudes = Amplitudes; 
     struct.Waves = Waves; 
     struct.Angles = Angles;
