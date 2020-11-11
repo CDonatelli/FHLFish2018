@@ -1,4 +1,4 @@
-function sOut = FishBurrowing(videoName)
+function sOut = FishBurrowingNoCrop(videoName)
 
 sOut = struct;
 %vars = who;
