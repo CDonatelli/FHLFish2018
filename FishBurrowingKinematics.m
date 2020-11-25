@@ -28,6 +28,7 @@ function struct = FishBurrowingKinematics(structfile)
         fishPixels = median(FishPixelLengths);
         
         struct.fishLength = lengthMM;
+        struct.fishPixels = fishPixels;
         VidScale = lengthMM/fishPixels;
         struct.VidScale = VidScale;
         
@@ -35,6 +36,7 @@ function struct = FishBurrowingKinematics(structfile)
     npts = 21;
     % initiating new variables
     x = []; y = []; tailPtCordsY = []; tailPtCordsX = [];
+    Curvature = [];
     for i = 1:nfr
         xPts = mids(i).MidLine(:,1); yPts = mids(i).MidLine(:,2);
         randPts = rand(1,length(xPts))/1000; xPts = xPts+randPts';
@@ -42,6 +44,9 @@ function struct = FishBurrowingKinematics(structfile)
         [pts, deriv, funct] = interparc(npts, xPts, yPts, 'spline');
         % add those points to an array
         x = [x,pts(:,1)]; y = [y,pts(:,2)];
+        % L: Arc length R: Curvature radius K: Curvature vector
+        [L, R, K] = curvature(x,y);
+        Curvature = [Curvature, abs(R)./fishPixels];
     end
     struct.X = x; struct.Y = y;
     % figure out time for each frame and make a vector of times
@@ -58,7 +63,7 @@ function struct = FishBurrowingKinematics(structfile)
     s = linspace(1,lengthMM,npts);
     struct.s = s';
     
-    Amplitudes = []; Waves = []; Angles = [];
+    Amplitudes = []; Waves = []; Angles = []; MaxCurvature = [];
     
     pkVal = 0;
     pkProm = 0.075;
@@ -100,39 +105,40 @@ function struct = FishBurrowingKinematics(structfile)
         
         %%%%% Peak Finder
         [AmpPks,AmpLoc] = findpeaks(abs(pointY),struct.t,'MinPeakProminence',pkProm);
-        Amplitudes = [Amplitudes; median(AmpPks)/fishPixels];
+        Amplitudes = [Amplitudes; prctile(AmpPks,95)/fishPixels];
         Waves = [Waves; length(AmpPks)/2];
+        MaxCurvature = [MaxCurvature; max(Curvature(:,j))];
         
         % For walking MPP = 0.5; For swimming MPP = 0.05
-        tAngles = smooth((atan2(pointY, pointX)*180/pi)');
-        [AngPks,AngLoc] = findpeaks(abs(tAngles),struct.t,'MinPeakProminence',0.05);
-        Angles = [Angles; median(AngPks)];
+%         tAngles = smooth((atan2(pointY, pointX)*180/pi)');
+%         [AngPks,AngLoc] = findpeaks(abs(tAngles),struct.t,'MinPeakProminence',0.05);
+%         Angles = [Angles; median(AngPks)];
         
-%                 subplot(1,2,1);
-%                 plot(struct.t, abs(pointY))
-%                 hold on
-%                 plot(AmpLoc, AmpPks, 'ro')
-%                 subplot(1,2,2);
-%                 plot(struct.t, abs(tAngles))
-%                 hold on
-%                 plot(AngLoc, AngPks, 'ro')
-%                 pause
-%                 close all
+                plot(struct.t, abs(pointY))
+                hold on
+                plot(AmpLoc, AmpPks, 'ro')
+                pause
+                close all
         
     end
+    
+    t0 = find(struct.t == min(AmpLoc)); t1 = find(struct.t == max(AmpLoc));
+    noseAtPeaks = [x(1,t0),y(1,t0);x(1,t1),y(1,t1)];
+    peak2peakDist = pdist(noseAtPeaks, 'euclidean');
+    peak2peakDist = peak2peakDist./fishPixels;
+    
     nose = [x(1,1),y(1,1);x(1,end),y(1,end)];
     distance = pdist(nose, 'euclidean');
-    struct.distance = distance./fishPixels;                  
-    struct.swimmingSpeed = (struct.distance/struct.t(end));        
-        t0 = find(struct.t == min(AmpLoc)); t1 = find(struct.t == max(AmpLoc));
-        noseAtPeaks = [x(1,t0),y(1,t0);x(1,t1),y(1,t1)];
-        peak2peakDist = pdist(noseAtPeaks, 'euclidean');
-        peak2peakDist = peak2peakDist./fishPixels;
+    struct.distanceTotal = distance./fishPixels;
+    struct.distanceP2P = peak2peakDist;
+    struct.swimmingSpeed = peak2peakDist/(t1-t0);        
     struct.strideLength = peak2peakDist/Waves(end);
-    struct.bendingFrequency = Waves./struct.t(end);
+    struct.bendingFrequency = Waves./(t1-t0);
     struct.Amplitudes = Amplitudes; 
     struct.Waves = Waves; 
-    struct.Angles = Angles;
+%     struct.Angles = Angles;
+    struct.Curvature = Curvature;
+    struct.maxCurvature = MaxCurvature;
     
     eval([cell2mat(vars(1)), '= struct'])
     save(cell2mat(vars(1)), cell2mat(vars(1)));
