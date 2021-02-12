@@ -1,3 +1,4 @@
+
 function struct = FishBurrowingKinematics(structfile)
     load(structfile);
     clear 'structfile'
@@ -38,15 +39,16 @@ function struct = FishBurrowingKinematics(structfile)
     x = []; y = []; tailPtCordsY = []; tailPtCordsX = [];
     Curvature = [];
     for i = 1:nfr
-        xPts = mids(i).MidLine(:,1); yPts = mids(i).MidLine(:,2);
+        xPts = sgolayfilt(mids(i).MidLine(:,1),1,15); 
+        yPts = sgolayfilt(mids(i).MidLine(:,2),1,15);
         randPts = rand(1,length(xPts))/1000; xPts = xPts+randPts';
         % Generate equation if the midline
         [pts, deriv, funct] = interparc(npts, xPts, yPts, 'spline');
         % add those points to an array
         x = [x,pts(:,1)]; y = [y,pts(:,2)];
         % L: Arc length R: Curvature radius K: Curvature vector
-        [L, R, K] = curvature(x,y);
-        Curvature = [Curvature, abs(R)./fishPixels];
+%         [L, R, K] = curvature(x,y);
+%         Curvature = [Curvature, abs(R)./fishPixels];
     end
     struct.X = x; struct.Y = y;
     % figure out time for each frame and make a vector of times
@@ -74,8 +76,8 @@ function struct = FishBurrowingKinematics(structfile)
         yT = polyval(p, pointX);        % y values for that line
         pointY = pointY - yT;           % subtract y values to get amplitude
         pointY = smooth(pointY,15,'rlowess'); pointX = smooth(pointX,15, 'rlowess');
-        [AmpPks,AmpLoc] = findpeaks(abs(pointY),struct.t,'MinPeakProminence',pkProm);
-        plot(struct.t, abs(pointY)) 
+        [AmpPks,AmpLoc] = findpeaks(pointY,struct.t,'MinPeakProminence',pkProm);
+        plot(struct.t, pointY) 
         hold on
         plot(AmpLoc, AmpPks, 'bo')
         hold off
@@ -114,11 +116,11 @@ function struct = FishBurrowingKinematics(structfile)
 %         [AngPks,AngLoc] = findpeaks(abs(tAngles),struct.t,'MinPeakProminence',0.05);
 %         Angles = [Angles; median(AngPks)];
         
-                plot(struct.t, abs(pointY))
-                hold on
-                plot(AmpLoc, AmpPks, 'ro')
-                pause
-                close all
+%                 plot(struct.t, abs(pointY))
+%                 hold on
+%                 plot(AmpLoc, AmpPks, 'ro')
+%                 pause
+%                 close all
         
     end
     
