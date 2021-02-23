@@ -109,7 +109,7 @@ function struct = FishBurrowingKinematics(structfile)
         [AmpPks,AmpLoc] = findpeaks(abs(pointY),struct.t,'MinPeakProminence',pkProm);
         Amplitudes = [Amplitudes; prctile(AmpPks,95)/fishPixels];
         Waves = [Waves; length(AmpPks)/2];
-        MaxCurvature = [MaxCurvature; max(Curvature(:,j))];
+%         MaxCurvature = [MaxCurvature; max(Curvature(:,j))];
         
         % For walking MPP = 0.5; For swimming MPP = 0.05
 %         tAngles = smooth((atan2(pointY, pointX)*180/pi)');
@@ -139,8 +139,8 @@ function struct = FishBurrowingKinematics(structfile)
     struct.Amplitudes = Amplitudes; 
     struct.Waves = Waves; 
 %     struct.Angles = Angles;
-    struct.Curvature = Curvature;
-    struct.maxCurvature = MaxCurvature;
+%     struct.Curvature = Curvature;
+%     struct.maxCurvature = MaxCurvature;
     
     eval([cell2mat(vars(1)), '= struct'])
     save(cell2mat(vars(1)), cell2mat(vars(1)));
