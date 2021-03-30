@@ -1,8 +1,10 @@
+
 function [T, A] = kinematicsTableGenerator(csvName)
-    list = dir('*.mat');
+    list = dir('*bw.mat');
 
     SwimmingSpeed = []; StrideLength = [];
-    Species = []; Trial = [];
+    TailFrequency = []; TailAmplitude = [];
+    Fish = []; Trial = [];
 
     for i = 1:length(list)
         NameStr = list(i).name;
@@ -10,14 +12,16 @@ function [T, A] = kinematicsTableGenerator(csvName)
         fns = fieldnames(Struct);
         Struct = Struct.(fns{1});
         
-        Species = [Species; NameStr(1:5)];
-        Trial = [Trial; str2double(NameStr(12))+1];
+        Fish = [Fish; Struct.fishID];
+        Trial = [Trial; Struct.trialID];
         SwimmingSpeed = [SwimmingSpeed; Struct.swimmingSpeed];
-        StrideLength = [StrideLength; Struct.bendingStrideLength];
+        StrideLength = [StrideLength; Struct.strideLength];
+        TailFrequency = [ TailFrequency; Struct.bendingFrequency];
+        TailAmplitude = [TailAmplitude; Struct.Amplitudes];
 
     end
     
-    T = table(Species, Trial, SwimmingSpeed, StrideLength);
+    T = table(Fish, Trial, SwimmingSpeed, StrideLength, TailFrequency, TailAmplitude);
     A = table2array(T);
     writetable(T,csvName);
    
