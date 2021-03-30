@@ -118,7 +118,7 @@ for Index = 1:FrNum
     
     %this finds a circle on the clicked point and plots it for debug
     %coordinates of a circle centered on the user point
-    FullCircle = GetArc(TempCenter(1),TempCenter(2),3*Radius,0,2*pi);     
+    FullCircle = GetArc(TempCenter(1),TempCenter(2),Radius,0,2*pi);     
     plot(FullCircle(:,1),FullCircle(:,2),'.b');     %debug code
     hold on
     %180 degrees of arc centered on the user point
