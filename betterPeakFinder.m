@@ -1,7 +1,7 @@
 function [k,p] = betterPeakFinder(X,Y)
 
-[p1,k1] = findpeaks(Y,X);
-[p2,k2] = findpeaks(-Y,X);
+[p1,k1] = findpeaks(Y,X,'MinPeakProminence',2);
+[p2,k2] = findpeaks(-Y,X,'MinPeakProminence',2);
 
 p = [p1'; -p2']; k = [k1'; k2'];
 peaks = [k,p]; 
