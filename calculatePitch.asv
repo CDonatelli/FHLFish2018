@@ -1,0 +1,27 @@
+
+
+plot(smooth(pitchDat(:,1)),smooth(pitchDat(:,2)))
+hold on
+plot(smooth(pitchDat(:,3)),smooth(pitchDat(:,4)))
+
+nose = [smooth(pitchDat(:,1)),smooth(pitchDat(:,2))];
+tail = [smooth(pitchDat(:,3)),smooth(pitchDat(:,4))];
+ 
+noseMin = min(nose(:,2)); tailMin = min(tail(:,2));
+actualMin = min([noseMin, tailMin]);
+
+[m,~] = size(nose);
+ground = [nose(:,1), repmat(actualMin, [m, 1])];
+
+angles = abc_angle(tail, nose, ground);
+
+n1 = (tail - nose) / norm(tail - nose);  % Normalized vectors
+n2 = (ground - nose) / norm(ground - nose);
+angle1 = acos(dot(n1, n2));                        % Instable at (anti-)parallel n1 and n2
+angle2 = asin(norm(cropss(n1, n2));                % Instable at perpendiculare n1 and n2
+angle3 = atan2(norm(cross(n1, n2)), dot(n1, n2));  % Stable
+
+angle = [];
+for i = 1:m
+    
+end
