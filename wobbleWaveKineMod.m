@@ -1,11 +1,3 @@
-function struct = wobbleWaveKineMod(structfile)
-    load(structfile);
-    clear 'structfile'
-    vars = who;
-    eval(['struct=',cell2mat(vars(1))])
-    % struct.fishLength = 85; <-- for debugging
-    % Initiating variables
-        % reading variables from structure
 
     prompt = {'Enter fish length in mm (leave as 0 if unknown)'};
     dlgtitle = 'Fish Length';

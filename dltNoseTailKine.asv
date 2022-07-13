@@ -1,0 +1,57 @@
+function dataStruct = dltNoseTailKine(testData)
+%Note, make sure that you don't input any NaN
+
+dataStruct = struct;
+
+    prompt = {'Fish ID:', 'Trial ID:', 'Frame Rate:', 'Fish Length (mm):','Scale (mm/pixel):'};
+    dlgtitle = 'Fish Data: Leave defaults if unknown';
+    dims = [1 35];
+    definput = {'n/a','n/a', '120','0','0'};
+    answer = inputdlg(prompt,dlgtitle,dims,definput);
+        dataStruct.fishID = answer{1};
+        dataStruct.trialID = answer{2};
+        dataStruct.FrameRate = str2num(answer{3});
+        dataStruct.fishLength = str2num(answer{4});
+        dataStruct.scale = str2num(answer{5}); %mm/pixel
+        
+    length = dataStruct.fishLength;
+    [m,~] = size(testData);
+
+    struct.tailPts = [smooth(testData(:,7)), smooth(testData(:,8))];
+    struct.nosePts = [smooth(testData(:,1)), smooth(testData(:,2))];
+
+    fr = dataStruct.FrameRate;
+    total = m/fr; 
+    struct.t = linspace(0,total,m);
+
+    p = polyfit(struct.tailPts(:,1), struct.tailPts(:,2),2);     % fit line for the tail wave
+    yT = polyval(p, struct.tailPts(:,1)); % y values for that line
+
+    tailY = smooth(struct.tailPts(:,2)-yT);
+    
+    %%%%% Mini-Peak Finder
+        [p1,k1] = findpeaks(tailY,struct.t,'MinPeakProminence',5);
+        [p2,k2] = findpeaks(-tailY,struct.t,'MinPeakProminence',5);
+        p = [p1;abs(p2)]; k = [k1';abs(k2')];
+        peaks = [k,p]; peaks = sortrows(peaks);
+        k = peaks(:,1); p = peaks(:,2);
+        tailPeaks = [k,p];
+
+    [tf,idx] = ismember(k,struct.t);
+    tailPeakX = struct.tailPts(idx,2);
+    
+    tailAmps = abs(p*dataStruct.scale);
+    
+    nose = [struct.nosePts(1,1), struct.nosePts(1,2); ...
+            struct.nosePts(end,1), struct.nosePts(end,2);];
+    distance = pdist(nose, 'euclidean');
+    distance = distance.*struct.VidScale;
+    %speed in m/s
+    struct.swimmingSpeed = (distance/struct.t(end))/1000;
+    struct.bendingFrequency = wavenum/2/struct.t(end);
+    struct.bendingPeriod = 1/struct.bendingFrequency;
+    struct.bendingStrideLength = distance/(wavenum/2);
+    struct.bendingAmp = median(tailAmps);
+    struct.bendingAmps = tailAmps;
+    struct.bodyAmps = BodyAmps;
+end
